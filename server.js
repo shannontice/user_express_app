@@ -46,6 +46,7 @@
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
+const cors = require('cors');
 
 const app = express()
 const PORT = 3333
@@ -65,6 +66,11 @@ async function saveUserData(usersArr) {
 // Opening up the middleware channel to allow json to be sent through from the clinet
 app.use(express.json());
 
+// Share of create a get route for every file in the public folder
+app.use(express.static('./public'))
+
+// Open CORS to all domains
+app.use(cors());
 
 // Route to retreive/get all users from the json database
 app.get('/api/users', async (requestObj, responseObj) => {
