@@ -44,24 +44,12 @@
 // Post request is sending some information along with the request
 
 const express = require('express');
-const path = require('path');
-const fs = require('fs');
 const cors = require('cors');
-
 const app = express()
 const PORT = 3333
 
-async function getUserData() {
-    const users = await fs.promises.readFile('./data.json', 'utf8');
+const api_routes = require('./routes/api_routes');
 
-    return JSON.parse(users);
-}
-
-async function saveUserData(usersArr) {
-    await fs.promises.writeFile('./data.json', JSON.stringify(usersArr, null, 2));
-
-    console.log('User data updated')
-}
 
 // Opening up the middleware channel to allow json to be sent through from the clinet
 app.use(express.json());
@@ -72,43 +60,8 @@ app.use(express.static('./public'))
 // Open CORS to all domains
 app.use(cors());
 
-// Route to retreive/get all users from the json database
-app.get('/api/users', async (requestObj, responseObj) => {
-    const users = await getUserData();
-
-    responseObj.send(users);
-});
-
-// Route to add a user to the JSON database
-app.post('/api/users', async (requestObj, responseObj) => {
-    // Get the old users array
-    const users = await getUserData();
-
-
-    // Overwrite the old array with the newly upated array
-    if (!users.find(user => user.username === requestObj.body.username)) {
-        // Push the body obj from the clients to our old array
-        users.push(requestObj.body);
-
-        await saveUserData(users);
-
-        return responseObj.send({
-            message: 'User Add!'
-        })
-    }
-
-    responseObj.send({
-        error: 402,
-        message: 'User already exists'
-    })
-
-
-    // Respond back to the client
-    responseObj.send({
-        message: 'User added!'
-    })
-});
-
+// Load Routes
+app.use('/api', api_routes);
 
 app.listen(PORT, () => {
     console.log('Server started on port', PORT)
